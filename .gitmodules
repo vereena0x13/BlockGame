@@ -1,0 +1,3 @@
+[submodule "vendor/vstd"]
+	path = vendor/vstd
+	url = git@github.com:vereena0x13/vstd.git

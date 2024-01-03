@@ -1,0 +1,13 @@
+#!/bin/bash
+while :
+do
+    PID=$(pgrep BlockGame)
+    if [ $? -eq 0 ]; then
+        echo $(ps -p $PID -o vsz,rss)
+    else
+        echo "No BlockGame process found!"
+    fi
+    sleep 1
+    tput cuu1
+    tput el
+done

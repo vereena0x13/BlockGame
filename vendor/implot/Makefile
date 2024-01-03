@@ -1,0 +1,24 @@
+SRC_DIR=implot
+LIB_DIR=lib
+VENDOR_DIR=..
+LIB_NAME=implot.a
+
+SOURCES=$(wildcard $(SRC_DIR)/*.cpp)
+OBJECTS=$(SOURCES:%.cpp=%.o)
+
+# TODO: Don't _always_ use -g, etc.; release vs dev/debug
+CXXFLAGS=-I$(SRC_DIR) -I$(VENDOR_DIR)/imgui/imgui -I$(VENDOR_DIR)/GLFW/include -I$(VENDOR_DIR)/GLEW/include -DIMGUI_IMPL_OPENGL_LOADER_GLEW -DGLEW_NO_GLU -std=c++17 -g
+
+CC=g++
+
+.PHONY: static clean
+
+static: $(OBJECTS)
+	mkdir -p $(LIB_DIR)
+	ar rcs $(LIB_DIR)/$(LIB_NAME) $(OBJECTS)
+
+clean:
+	rm -f $(OBJECTS)
+
+$(SRC_DIR)/%.o: $(SRC_DIR)/%.cpp
+	$(CC) $(CXXFLAGS) -c -o $@ $<

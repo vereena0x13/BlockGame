@@ -1,0 +1,9 @@
+BlockGame
+saves
+screenshots
+logs
+*.exe
+*.stackdump
+*.o
+.vscode/
+imgui.ini
