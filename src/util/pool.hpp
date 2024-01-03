@@ -26,10 +26,7 @@ struct Pool {
     u64 allocated() { return count; }
 
 private:
-    u64 size;
     Pool_Elem<T> *data;
     Pool_Elem<T> *free_list;
     u64 count;
-
-    void expand();
 };

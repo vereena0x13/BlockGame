@@ -1,5 +1,5 @@
-template<typename T>
-Pool<T>::Pool(u64 _size) : size(_size) {
+template<typename T> requires Poolable<T>
+Pool<T>::Pool(u64 size) {
     data = cast(elem_type*, xalloc(sizeof(elem_type) * size));
     memset(data, 0, sizeof(data));
 
@@ -12,7 +12,7 @@ Pool<T>::Pool(u64 _size) : size(_size) {
     free_list = &data[size - 1];
 }
 
-template<typename T>
+template<typename T> requires Poolable<T>
 T* Pool<T>::alloc() {
     count++;
     auto e = free_list;
@@ -22,7 +22,7 @@ T* Pool<T>::alloc() {
     return &e->value;
 }
 
-template<typename T>
+template<typename T> requires Poolable<T>
 void Pool<T>::free(T *p) {
     assert(p);
     count--;
