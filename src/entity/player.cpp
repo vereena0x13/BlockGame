@@ -161,7 +161,7 @@ private:
 
         u32 iteration = 0;
         while(d.length() > EPSILON && iteration++ < MAX_ITER) {
-            AABB target_bb = { bb.min + d, bb.max + d };
+            AABB target_bb = bb + d;
             auto broad = AABB::disjunction(bb, target_bb);
 
             AABB::Hit best = { false, 1.0f };
@@ -172,7 +172,7 @@ private:
             for(s32 i = minbp.x; i <= maxbp.x; i++) {
                 for(s32 j = minbp.y; j <= maxbp.y; j++) {
                     for(s32 k = minbp.z; k <= maxbp.z; k++) {
-                        vec3i bp = vec3i(i,j,k);
+                        auto bp = vec3i(i,j,k);
 
                         auto block = world->get_block(bp);
                         if(!block || block == block_air) continue;

@@ -633,36 +633,38 @@ struct AABB {
     static AABB from_center(vec3 const& center, vec3 const& half_size) { return { center - half_size, center + half_size }; }
     static AABB disjunction(AABB const& a, AABB const& b) { return { ::min(a.min, b.min), ::max(a.max, b.max) }; }
 
-    static Hit sweep(AABB const& a, AABB const& b, vec3 const& delta) {
-        vec3 dg0 = gt(delta, vec3());
-        vec3 dl0 = vec3(1) - dg0;
+    AABB operator+(vec3 const& b) { return AABB(min + b, max + b); }
 
-        vec3 l0 = b.min * dg0 + b.max * dl0;
-        vec3 r0 = a.max * dg0 + a.min * dl0;
-        vec3 l1 = b.max * dg0 + b.min * dl0;
-        vec3 r1 = a.min * dg0 + a.max * dl0;
+    static Hit sweep(AABB const& a, AABB const& b, vec3 const& delta) {
+        vec3 dg0        = gt(delta, vec3());
+        vec3 dl0        = vec3(1) - dg0;
+
+        vec3 l0         = b.min * dg0 + b.max * dl0;
+        vec3 r0         = a.max * dg0 + a.min * dl0;
+        vec3 l1         = b.max * dg0 + b.min * dl0;
+        vec3 r1         = a.min * dg0 + a.max * dl0;
   
-        vec3 inv_entry = l0 - r0;
-        vec3 inv_exit = l1 - r1;
+        vec3 inv_entry  = l0 - r0;
+        vec3 inv_exit   = l1 - r1;
 
         vec3 entry;
         vec3 exit;
 
-        #define F(axis) \
-            if(delta.axis == 0) { \
-                entry.axis = -FLT_MAX; \
-                exit.axis = FLT_MAX; \
-            } else { \
-                entry.axis = inv_entry.axis / delta.axis; \
-                exit.axis = inv_exit.axis / delta.axis; \
+        #define F(axis)                                     \
+            if(delta.axis == 0) {                           \
+                entry.axis = -FLT_MAX;                      \
+                exit.axis = FLT_MAX;                        \
+            } else {                                        \
+                entry.axis = inv_entry.axis / delta.axis;   \
+                exit.axis = inv_exit.axis / delta.axis;     \
             }
         F(x)
         F(y)
         F(z)
         #undef X
 
-        f32 max_entry = ::max(::max(entry.x, entry.y), entry.z);
-        f32 min_exit = ::min(::min(exit.x, exit.y), exit.z);
+        f32 max_entry   = ::max(::max(entry.x, entry.y), entry.z);
+        f32 min_exit    = ::min(::min(exit.x, exit.y), exit.z);
 
         if((max_entry > min_exit) || ((entry.x < 0.0f) && (entry.y < 0.0f) && (entry.z < 0.0f)) || (entry.x > 1.0f) || (entry.y > 1.0f) || (entry.z > 1.0f)) {
             return { false, 1.0f };

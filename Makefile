@@ -28,30 +28,20 @@ debug: clean
 debug: CXXFLAGS+=-O0
 debug: CXXFLAGS+=-g
 debug: CXXFLAGS+=-DBG_DEBUG
-debug: ctbegin $(EXE) ctend
+debug: $(EXE)
 
 release: imgui
 release: implot
 release: clean
 release: CXXFLAGS+=-O2
 release: CXXFLAGS+=-DBG_RELEASE
-release: ctbegin $(EXE) ctend
+release: $(EXE)
 
 clean:
 	rm -f $(EXE)
 
 run: debug
 	./$(EXE)
-
-ctbegin:
-ifdef CTIME
-	@ctime -begin linux.ctm
-endif
-
-ctend:
-ifdef CTIME
-	@ctime -end linux.ctm
-endif
 
 imgui:
 	cd vendor/imgui && $(MAKE)
