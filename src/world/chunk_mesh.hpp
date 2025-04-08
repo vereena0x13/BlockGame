@@ -12,6 +12,15 @@ u32 const CHUNK_N_FACES = CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 6;
 u32 const CHUNK_N_VERTICES = CHUNK_N_FACES * 4;
 u32 const CHUNK_N_INDICES = CHUNK_N_FACES * 6;
 
+// TODO: this could be much more efficient / performant
+//         - Vtx::pos doesn't need to be a vec3; we really only need
+//           a few bits for any given vertex x, y, or z component
+//         - greedy meshing (or, perhaps, "binary meshing"?)
+//         - glDrawElementsIndirect?
+//       there's definitely more that can be done but, yeah. add
+//       ideas as we think of them ig :P
+//                      - vereena0x13, 4-8-25
+
 struct Chunk_Mesh {
     struct Vtx {
         vec3 pos;

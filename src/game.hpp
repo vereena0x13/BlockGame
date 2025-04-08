@@ -47,6 +47,8 @@ struct Game {
     bool mouse[6] = { false, false, false, false, false, false };
     bool mouse_last[6] = { false, false, false, false, false, false };
 
+    s32 gamepad = GLFW_JOYSTICK_3; // TODO: don't hardcode -1;
+
     bool generated_item_block_textures = false;
     bool wireframe = false;
     bool show_imgui = false;
@@ -110,6 +112,8 @@ struct Game {
     void update_matrices_and_frustum();
 
 private:
+    bool init_glfw();
+    bool init_glew();
     bool init_gl();
     bool init();
     void register_textures();

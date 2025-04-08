@@ -667,7 +667,7 @@ struct AABB {
         f32 min_exit    = ::min(::min(exit.x, exit.y), exit.z);
 
         if((max_entry > min_exit) || ((entry.x < 0.0f) && (entry.y < 0.0f) && (entry.z < 0.0f)) || (entry.x > 1.0f) || (entry.y > 1.0f) || (entry.z > 1.0f)) {
-            return { false, 1.0f };
+            return { false, 1.0f, vec3() };
         }
 
         assert(max_entry >= 0.0f && max_entry <= 1.0f);
@@ -680,7 +680,7 @@ struct AABB {
         } else if(entry.z > entry.x && entry.z > entry.y) {
             n = vec3(0, 0, inv_entry.z > 0 ? -1 : 1);
         } else {
-            return { false, 1.0f };
+            return { false, 1.0f, vec3() };
         }
 
         return { true, max_entry, n };

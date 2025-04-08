@@ -1,3 +1,7 @@
+// TODO: i'm pretty sure this whole system could be a 
+//       bit more efficient... we should avoid the polling 
+//       that we're doing on chunks (regions, really) from World.
+
 u32 const REGION_SIZE_LOG2 = 4;
 u32 const REGION_SIZE = pow(REGION_SIZE_LOG2, 2);
 

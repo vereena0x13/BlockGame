@@ -118,7 +118,7 @@ Texture* load_texture_from_file(cstr name, bool generate_mipmaps = false, Alloca
 
     stbi_image_free(image);
 
-    log(TRACE, "Loaded texture '%s' (%d, %d) with %d MIP %s", name, w, h, levels == 1 ? "level" : "levels");
+    log(TRACE, "Loaded texture '%s' (%d, %d) with %d MIP %s", name, w, h, levels, levels == 1 ? "level" : "levels");
 
     return result;
 }

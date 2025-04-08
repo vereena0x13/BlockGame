@@ -13,11 +13,20 @@
 #include <sys/stat.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <signal.h>
 
 #ifdef _MSC_VER
 #include <intrin.h>
 #else
 #include <x86intrin.h>
+#endif
+
+
+#ifdef BG_DEBUG
+#include "cpptrace/cpptrace.hpp"
+#define VSTD_PANIC_HOOK { cpptrace::generate_trace().print(); exit(EXIT_FAILURE); }
+#else
+#define VSTD_PANIC_HOOK { exit(EXIT_FAILURE); }
 #endif
 
 
@@ -62,6 +71,11 @@
 #include "implot_demo.cpp"
 #include "imgui_support.cpp"
 #endif
+
+
+//#pragma GCC diagnostic warning "-Wall"
+//#pragma GCC diagnostic warning "-Wextra"
+//#pragma GCC diagnostic warning "-pedantic"
 
 
 #define TEMPORARY_STORAGE_SIZE MEBIBYTES(1)
@@ -141,6 +155,25 @@ pthread_t main_thread;
 #include "ui/settings.cpp"
 
 
+#ifdef BG_DEBUG
+void signal_handler(int signo, siginfo_t *info, void *ctx) {
+    // NOTE: this is very much not safe or correct. fuck it we ball.
+    cpptrace::generate_trace().print();
+    exit(EXIT_FAILURE);
+}
+
+void setup_fault_handler() {
+    struct sigaction action = { 0 };
+    action.sa_flags = 0;
+    action.sa_sigaction = &signal_handler;
+    if (sigaction(SIGSEGV, &action, NULL) == -1) {
+        perror("sigaction");
+        exit(EXIT_FAILURE);
+    }
+}
+#endif
+
+
 #ifdef GL_DEBUG
 void gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam) {
 	if (severity == GL_DEBUG_SEVERITY_NOTIFICATION || severity == GL_DEBUG_SEVERITY_LOW) {
@@ -182,6 +215,10 @@ void char_callback(GLFWwindow *window, u32 cp) {
 void window_size_callback(GLFWwindow* window, s32 width, s32 height) {
     auto p = cast(Game*, glfwGetWindowUserPointer(window));
     p->window_size_callback(width, height);
+}
+
+void joystick_callback(s32 jid, s32 event) {
+    log(TRACE, "joystick_callback %d %d");
 }
 
 void Game::scroll_callback(f64 x, f64 y) {
@@ -281,11 +318,7 @@ bool Game::mouse_pressed(s32 button) {
     return mouse[button] && !mouse_last[button];
 }
 
-bool Game::init_gl() {
-    ////////////////////////////////////////////////
-    // Set up GLFW and a window, GLEW, and OpenGL //
-    ////////////////////////////////////////////////
-
+bool Game::init_glfw() {
     if (!glfwInit()) {
         log(ERROR, "Failed to initialized GLFW3!\n");
         return false;
@@ -318,18 +351,32 @@ bool Game::init_gl() {
     glfwSetKeyCallback(window, ::key_callback);
     glfwSetCharCallback(window, ::char_callback);
     glfwSetWindowSizeCallback(window, ::window_size_callback);
+    glfwSetJoystickCallback(joystick_callback);
 
     glfwSwapInterval(1);
 
+    auto mappings = read_entire_file(cast(str, "assets/gamecontrollerdb.txt"), temp_allocator);
+    if(!glfwUpdateGamepadMappings(mappings)) {
+        log(ERROR, "Failed to update GLFW gamepad mappings!\n");
+        return false;
+    }
+
     log(DEBUG, "GLFW initialized");
 
+    return true;
+}
+
+bool Game::init_glew() {
     if(glewInit() != GLEW_OK) {
         log(ERROR, "Failed to initialize GLEW!\n");
         return false;
     }
-
     log(DEBUG, "GLEW initialized");
 
+    return true;
+}
+
+bool Game::init_gl() {
     #ifdef GL_DEBUG
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -363,6 +410,8 @@ bool Game::init_gl() {
 }
 
 bool Game::init() {
+    if(!init_glfw()) return false;
+    if(!init_glew()) return false;
     if(!init_gl()) return false;
 
     #ifndef IMGUI_DISABLE
@@ -463,9 +512,7 @@ void Game::check_resize() {
         window_resized = false;
 
         update_matrices_and_frustum();
-
         glViewport(0, 0, window_width, window_height);
-
         log(TRACE, "Window resized: (%d, %d)", window_width, window_height);
     }
 }
@@ -581,6 +628,7 @@ s32 Game::run(s32 argc, cstr *argv) {
 void Game::update() {
     TIMED_BLOCK("Update");
     
+
     #ifdef PROFILER_ENABLED
     if(!paused_for_profiler) guis[active_gui]->update();
     #else
@@ -720,6 +768,41 @@ void Game::draw_imgui() {
                 ImGui::EndTabItem();
             }
 
+            if(gamepad != -1 && ImGui::BeginTabItem("Gamepad")) {
+                GLFWgamepadstate gpState;
+                if(!glfwGetGamepadState(gamepad, &gpState)) {
+                    log(ERROR, "Failed to get gamepad %d state\n", gamepad);
+                } else {
+                    ImGui::Text("A: %d", gpState.buttons[GLFW_GAMEPAD_BUTTON_A]);
+                    ImGui::Text("B: %d", gpState.buttons[GLFW_GAMEPAD_BUTTON_B]);
+                    ImGui::Text("X: %d", gpState.buttons[GLFW_GAMEPAD_BUTTON_X]);
+                    ImGui::Text("Y: %d", gpState.buttons[GLFW_GAMEPAD_BUTTON_Y]);
+                    ImGui::Separator();
+                    ImGui::Text("LB: %d", gpState.buttons[GLFW_GAMEPAD_BUTTON_LEFT_BUMPER]);
+                    ImGui::Text("RB: %d", gpState.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER]);
+                    ImGui::Separator();
+                    ImGui::Text("BACK: %d", gpState.buttons[GLFW_GAMEPAD_BUTTON_BACK]);
+                    ImGui::Text("START: %d", gpState.buttons[GLFW_GAMEPAD_BUTTON_START]);
+                    ImGui::Text("GUIDE: %d", gpState.buttons[GLFW_GAMEPAD_BUTTON_GUIDE]);
+                    ImGui::Separator();
+                    ImGui::Text("LT: %d", gpState.buttons[GLFW_GAMEPAD_BUTTON_LEFT_THUMB]);
+                    ImGui::Text("RT: %d", gpState.buttons[GLFW_GAMEPAD_BUTTON_RIGHT_THUMB]);
+                    ImGui::Separator();
+                    ImGui::Text("DL: %d", gpState.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT]);
+                    ImGui::Text("DR: %d", gpState.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT]);
+                    ImGui::Text("DU: %d", gpState.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP]);
+                    ImGui::Text("DD: %d", gpState.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN]);
+                    ImGui::Separator();
+                    ImGui::Text("LX: %0.2f", gpState.axes[GLFW_GAMEPAD_AXIS_LEFT_X]);
+                    ImGui::Text("LY: %0.2f", gpState.axes[GLFW_GAMEPAD_AXIS_LEFT_Y]);
+                    ImGui::Text("RX: %0.2f", gpState.axes[GLFW_GAMEPAD_AXIS_RIGHT_X]);
+                    ImGui::Text("RY: %0.2f", gpState.axes[GLFW_GAMEPAD_AXIS_RIGHT_Y]);
+                    ImGui::Text("LT: %0.2f", gpState.axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER]);
+                    ImGui::Text("RT: %0.2f", gpState.axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER]);
+                }
+                ImGui::EndTabItem();
+            }
+
             if(ImGui::BeginTabItem("Settings")) {
                 if(ImGui::Checkbox("V-SYNC", &game->vsync)) {
                     if(game->vsync) glfwSwapInterval(1);
@@ -734,6 +817,7 @@ void Game::draw_imgui() {
                     ImGui::Checkbox("Show Hit UV", &gui.in_game->show_hit_uv);
                     ImGui::Checkbox("Show ImGui Metrics", &game->show_imgui_metrics_window);
                 }
+                if(ImGui::Button("Commit Sudoku")) *cast(u32*, 0) = 42;
                 ImGui::EndTabItem();
             }
 
@@ -869,6 +953,10 @@ void Game::shutdown() {
 Game *game;
 
 s32 main(s32 argc, cstr *argv) {
+    #ifdef BG_DEBUG
+    setup_fault_handler();
+    #endif
+
     main_thread = pthread_self();
     log_init();
     log(DEBUG, "Process ID: %d", getpid());

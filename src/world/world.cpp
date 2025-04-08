@@ -116,7 +116,7 @@ Chunk* World::get_chunk(vec3i chunk_pos) {
 
     if(!chunk) {
         chunk = xnew(Chunk, this, chunk_pos);
-        gen->generate_chunk(chunk);
+        gen->generate_chunk(chunk); // TODO: don't do this on the main thread!
         storage->set_chunk(chunk);
     }
     
@@ -165,12 +165,15 @@ Block_Entity* World::get_block_entity(vec3i pos) {
 void World::update() {
     TIMED_FUNCTION();
     
+
+    // TODO: dynamic chunk unloading; currently we add chunks but
+    //       never remove them, so performance degrades as the
+    //       player explores the world.
     for(u32 i = 0; i < chunks.size; i++) {
         if(chunks.slots[i].hash != 0) {
             auto const& pos = chunks.slots[i].key;
             auto const& chunk = chunks.slots[i].value;
             assert(chunk);
-
             chunk->update();
         }
     }
@@ -263,6 +266,9 @@ u32 World::draw_chunks(bool wireframe) {
         
         // NOTE: Next, sort the chunks in back-to-front 
         // order in relation to the view position.
+        // TODO: Why redo this computation every frame? Surely we can
+        // cache this easily and efficiently, no? I mean, we do a
+        // similar thing elsewhere...
         qsort(to_draw.data, to_draw.count, sizeof(Chunk*), chunk_btf_cmp_fn);
     }
 

@@ -1,3 +1,6 @@
 [submodule "vendor/vstd"]
 	path = vendor/vstd
 	url = git@github.com:vereena0x13/vstd.git
+[submodule "vendor/cpptrace"]
+	path = vendor/cpptrace
+	url = https://github.com/jeremy-rifkin/cpptrace
