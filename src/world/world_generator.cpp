@@ -33,3 +33,9 @@ void World_Generator::generate_chunk(Chunk *chunk) {
         }
     }
 }
+
+
+void Chunk_Generate_Task::run() {
+    gen->generate_chunk(chunk);
+    chunk->generated = true;
+}

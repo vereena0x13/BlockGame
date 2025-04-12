@@ -116,11 +116,14 @@ Chunk* World::get_chunk(vec3i chunk_pos) {
 
     if(!chunk) {
         chunk = xnew(Chunk, this, chunk_pos);
-        gen->generate_chunk(chunk); // TODO: don't do this on the main thread!
         storage->set_chunk(chunk);
+        game->task_queue.enqueue(xnew(Chunk_Generate_Task, gen, chunk));
     }
     
-    if(chunk) chunks.set(chunk_pos, chunk);        
+    if(chunk) {
+        if(chunk->generated)    chunks.set(chunk_pos, chunk);
+        else                    return NULL;
+    }  
     return chunk;
 }
 

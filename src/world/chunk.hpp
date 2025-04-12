@@ -8,6 +8,7 @@ struct Chunk {
     blkid blocks[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE];
     Hash_Table<vec3i, Block_Entity*> block_entities;
 
+    volatile bool generated = false;
     struct Chunk_Mesh *mesh = NULL;
 
     f32 dist = 0;
