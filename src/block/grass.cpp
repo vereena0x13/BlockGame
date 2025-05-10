@@ -3,7 +3,7 @@ struct Block_Grass : public Block {
     s32 tex_top;
     s32 tex_bottom;
 
-    Block_Grass(u32 id) : Block(id) {}
+    Block_Grass(blkid id) : Block(id) {}
 
     void register_textures(Texture_Array *texs) override {
         tex_sides = texs->add_from_file("blocks/grass_side");

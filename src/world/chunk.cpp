@@ -38,10 +38,13 @@ void Chunk::serialize(ByteBuf *bb) {
 void Chunk::deserialize(ByteBuf *bb) {
     chunk_pos = vec3i::read(bb);
 
+    block_count = 0;
     for(u32 x = 0; x < CHUNK_SIZE; x++) {
         for(u32 y = 0; y < CHUNK_SIZE; y++) {
             for(u32 z = 0; z < CHUNK_SIZE; z++) {
-                blocks[x][y][z] = bb->read_u32();
+                u32 id = bb->read_u32();
+                blocks[x][y][z] = id;
+                if(id != 0) block_count++;
             }
         }
     }
@@ -68,6 +71,9 @@ void Chunk::set_block(vec3i pos, blkid id) {
         xfree(be);
         assert(block_entities.remove(pos));
     }
+
+    if(blocks[pos.x][pos.y][pos.z] == blkid(0))     block_count++;
+    else                                            block_count--;
 
     blocks[pos.x][pos.y][pos.z] = id;
     if(mesh) mesh->dirty = true;

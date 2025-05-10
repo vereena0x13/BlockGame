@@ -109,6 +109,8 @@ pthread_t main_thread;
 #include "util/throttle.cpp"
 #include "util/task_queue.cpp"
 #include "util/static_bitset.cpp"
+#include "util/bit_buffer.cpp"
+#include "util/paletted_bit_buffer.cpp"
 #include "render/texture.cpp"
 #include "render/texture_array.cpp"
 #include "render/shader.cpp"

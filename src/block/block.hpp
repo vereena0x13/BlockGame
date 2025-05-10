@@ -1,5 +1,6 @@
 using blkid = u8;
 
+
 struct Block {
     blkid id;
 
@@ -28,6 +29,7 @@ struct Block {
     virtual void on_placed(World *world, vec3i pos, struct Hit *hit, f32 player_yaw) {}
 };
 
+
 #define BLOCKS(X) \
     X(air       ) \
     X(bedrock   ) \
@@ -50,5 +52,6 @@ extern blkid N_BLOCKS;
 #define X(name) extern Block* block_##name;
 BLOCKS(X)
 #undef X
+
 
 void register_blocks();

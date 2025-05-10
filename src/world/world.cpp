@@ -73,7 +73,7 @@ void World::load() {
     ByteBuf bb;
     if(bb.read_from_file(player_path)) {
         player->deserialize(&bb);
-        bb.deinit();
+        bb.free();
     }
 
     log(TRACE, "Loaded player data from '%s'", player_path);
@@ -93,7 +93,7 @@ void World::save_player() {
     ByteBuf bb;
     player->serialize(&bb);
     bb.write_to_file(path);
-    bb.deinit();
+    bb.free();
 
     log(TRACE, "Saved player data to '%s'", path);
 }

@@ -34,7 +34,7 @@ debug: $(EXE)
 release: imgui
 release: implot
 release: clean
-release: CXXFLAGS+=-O2
+release: CXXFLAGS+=-O3
 release: CXXFLAGS+=-DBG_RELEASE
 release: $(EXE)
 
