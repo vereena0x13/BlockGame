@@ -4,7 +4,7 @@ void Region_Save_Task::run() {
 }
 
 void Region_Save_Task::deinit() {
-    bb.deinit();
+    bb.free();
     Task::deinit();
 }
 
@@ -18,7 +18,7 @@ void Region_Load_Task::run() {
     ByteBuf bb;
     if(bb.read_from_file(region_path)) {
         region->deserialize(&bb);
-        bb.deinit();
+        bb.free();
     }
 
     storage->on_region_loaded(region);
