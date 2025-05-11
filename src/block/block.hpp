@@ -1,4 +1,4 @@
-using blkid = u8;
+using blkid = newtype<u8, struct blkid_tag>;
 
 
 struct Block {

@@ -13,7 +13,7 @@ bool Block::should_draw_face(World *world, vec3i pos, Direction dir) {
 
 
 Block* BLOCKS[1024];
-blkid N_BLOCKS = 0;
+blkid N_BLOCKS = blkid(0);
 
 
 #define X(name) Block *block_##name;

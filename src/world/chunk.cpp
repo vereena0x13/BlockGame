@@ -43,7 +43,7 @@ void Chunk::deserialize(ByteBuf *bb) {
         for(u32 y = 0; y < CHUNK_SIZE; y++) {
             for(u32 z = 0; z < CHUNK_SIZE; z++) {
                 u32 id = bb->read_u32();
-                blocks[x][y][z] = id;
+                blocks[x][y][z] = blkid(id);
                 if(id != 0) block_count++;
             }
         }
@@ -59,6 +59,8 @@ void Chunk::deserialize(ByteBuf *bb) {
         be->on_load(world);
         block_entities.set(p, be);
     }
+
+    generated = true;
 }
 
 void Chunk::set_block(vec3i pos, blkid id) {
@@ -110,7 +112,6 @@ void Chunk::update() {
             be->update();
         }
     }
-
 
     if(mesh) {
         auto player = world->player;

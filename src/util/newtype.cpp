@@ -19,7 +19,7 @@ struct newtype {
     constexpr T* operator->()               { return &value; }
     constexpr T const* operator->() const   { return &value; }
 
-    explicit constexpr operator T() const   { return value; }
+    /*explicit*/ constexpr operator T() const   { return value; }
 
     newtype& operator++() {
         value++;

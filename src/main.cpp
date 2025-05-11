@@ -94,6 +94,7 @@ pthread_t main_thread;
 
 
 #include "util/off_the_rails.cpp"
+#include "util/newtype.cpp"
 #include "util/atomics.cpp"
 #include "util/ticket_mutex.cpp"
 #include "util/pool.hpp"

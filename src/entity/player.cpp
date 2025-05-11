@@ -23,6 +23,7 @@ struct Player : public Entity {
 
     Texture *tex_hotbar;
     Texture *tex_hotbar_selection;
+    
 
     Player(Game *game) : Entity(game), camera(Camera(game, this)) {
         inventory = xnew(Container, 27);

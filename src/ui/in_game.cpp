@@ -22,10 +22,10 @@ struct Screenshot_Save_Task : public Task {
 };
 
 struct In_Game : public Panel {
-    bool show_f3_debug = false;
-    bool show_chunk_highlights = false;
-    bool show_collision_aabbs = false;
-    bool show_hit_uv = false;
+    bool show_f3_debug          = false;
+    bool show_chunk_highlights  = false;
+    bool show_collision_aabbs   = false;
+    bool show_hit_uv            = false;
 
     Hit hit;
     u32 chunks_drawn = 0;
@@ -44,6 +44,7 @@ struct In_Game : public Panel {
     bool should_reload_shaders = false;
     #endif
 
+    
     In_Game(Game *game) : Panel(game), sky(Sky(vec3(0.0, 0.0, 1.0))) {
     }
 
