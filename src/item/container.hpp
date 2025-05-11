@@ -4,7 +4,7 @@ enum Container_Flags : u8 {
     CONTAINER_FLAG_NONE              = 0,
     CONTAINER_FLAG_NO_INSERT         = 1,
     CONTAINER_FLAG_NO_EXTRACT        = 2,
-    CONTAINER_FLAG_FILTER_INSERTIONS = 3
+    CONTAINER_FLAG_FILTER_INSERTIONS = 4
 };
 
 struct Container {
